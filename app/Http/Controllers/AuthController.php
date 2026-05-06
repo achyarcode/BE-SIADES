@@ -34,8 +34,8 @@ class AuthController extends Controller
             'no_telp' => $request->no_telp,
         ]);
 
-        // c. Berikan Hak Akses (Role) Otomatis sebagai Warga
-        $user->assignRole('Warga');
+        // c. Berikan Hak Akses (Role) Otomatis sebagai warga
+        $user->assignRole('warga');
 
         // d. Buat Token Sanctum (Agar user langsung login setelah daftar)
         $token = $user->createToken('siades-auth-token')->plainTextToken;
