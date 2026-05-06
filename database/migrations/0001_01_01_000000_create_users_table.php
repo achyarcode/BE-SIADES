@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nik', 16)->unique();
             $table->string('no_kk', 16)->nullable();
             $table->string('name');
+            $table->string('username')->unique();
             $table->string('no_telp')->nullable();
             $table->string('password');
             $table->rememberToken();

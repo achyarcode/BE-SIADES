@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
 // URL PUBLIC (Tidak perlu token untuk akses ini)
+Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // URL PROTECTED (Wajib bawa token Sanctum untuk akses ini)
