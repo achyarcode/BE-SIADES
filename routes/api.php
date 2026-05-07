@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SuratController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 
 // URL PUBLIC (Tidak perlu token untuk akses ini)
 Route::post('/register', [AuthController::class, 'register']);
@@ -22,4 +25,21 @@ Route::middleware('auth:sanctum')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Admin Dashboard & Users
+    Route::get('/admin/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/admin/warga', [UserController::class, 'index']);
+
+    // Persetujuan Surat (Admin)
+    Route::get('/admin/persetujuan-surat', [SuratController::class, 'index']);
+    Route::post('/admin/persetujuan-surat/{id}/approve', [SuratController::class, 'approve']);
+    Route::patch('/admin/persetujuan-surat/{id}/reject', [SuratController::class, 'reject']);
+
+    // Pengajuan Surat (Warga)
+    Route::post('/warga/pengajuan-surat', [SuratController::class, 'store']);
+
 });
+
+// Fallback for unauthorized redirects from Sanctum
+Route::get('/login', function() {
+    return response()->json(['message' => 'Unauthenticated.'], 401);
+})->name('login');
