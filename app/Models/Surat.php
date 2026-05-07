@@ -13,6 +13,11 @@ class Surat extends Model
         'keperluan',
         'file_path',
         'status',
+        'signature_position',
+    ];
+
+    protected $casts = [
+        'signature_position' => 'array',
     ];
 
     public function user()

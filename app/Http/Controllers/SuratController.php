@@ -46,12 +46,21 @@ class SuratController extends Controller
 
     public function approve(Request $request, $id)
     {
+        $request->validate([
+            'signature_position' => 'nullable|array',
+            'signed_pdf' => 'nullable|file|mimes:pdf|max:4096',
+        ]);
+
         $surat = Surat::findOrFail($id);
         
-        // 1. Simpan PDF yang sudah ditandatangani jika ada
+        // 1. Save signature position if provided
+        if ($request->has('signature_position')) {
+            $surat->signature_position = $request->signature_position;
+        }
+
+        // 2. Save signed PDF if provided (Phase 2 will handle server-side signing, 
+        // for now we support manual upload of signed PDF if needed)
         if ($request->hasFile('signed_pdf')) {
-            // Hapus file lama jika ingin menghemat ruang, 
-            // atau simpan sebagai versi baru. Di sini kita timpa path-nya.
             if ($surat->file_path) {
                 Storage::disk('public')->delete($surat->file_path);
             }
@@ -60,7 +69,7 @@ class SuratController extends Controller
             $surat->file_path = $filePath;
         }
 
-        // 2. Update status
+        // 3. Update status
         $surat->status = 'DISETUJUI';
         $surat->save();
 
@@ -76,5 +85,31 @@ class SuratController extends Controller
         $surat->update(['status' => 'DITOLAK']);
 
         return response()->json($surat);
+    }
+
+    public function download($id)
+    {
+        $surat = Surat::findOrFail($id);
+        $user = auth()->user();
+
+        // Security checks:
+        // 1. Must be DISETUJUI
+        if ($surat->status !== 'DISETUJUI') {
+            return response()->json(['message' => 'Dokumen belum disetujui'], 403);
+        }
+
+        // 2. Must be owner OR admin
+        $isOwner = $surat->user_id === $user->id;
+        $isAdmin = $user->hasRole('admin') || $user->hasRole('super-admin'); // Adjust role names as needed
+
+        if (!$isOwner && !$isAdmin) {
+            return response()->json(['message' => 'Unauthorized access'], 403);
+        }
+
+        if (!$surat->file_path || !Storage::disk('public')->exists($surat->file_path)) {
+            return response()->json(['message' => 'File tidak ditemukan'], 404);
+        }
+
+        return Storage::disk('public')->download($surat->file_path);
     }
 }
