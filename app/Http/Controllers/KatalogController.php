@@ -65,4 +65,19 @@ class KatalogController extends Controller
 
         return response()->json(['message' => 'Katalog berhasil dihapus']);
     }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:Aktif,Nonaktif,Menunggu'
+        ]);
+
+        $katalog = Katalog::findOrFail($id);
+        $katalog->update(['status' => $validated['status']]);
+
+        return response()->json([
+            'message' => 'Status katalog berhasil diperbarui',
+            'data' => $katalog
+        ]);
+    }
 }

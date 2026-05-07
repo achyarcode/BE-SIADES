@@ -46,6 +46,11 @@ class SuratController extends Controller
 
     public function approve(Request $request, $id)
     {
+        // Hanya super-admin yang boleh menyetujui surat
+        if (!$request->user()->hasRole('super-admin')) {
+            return response()->json(['message' => 'Hanya Kepala Desa yang dapat menyetujui surat'], 403);
+        }
+
         $request->validate([
             'signature_position' => 'nullable|array',
             'signed_pdf' => 'nullable|file|mimes:pdf|max:4096',
@@ -81,6 +86,11 @@ class SuratController extends Controller
 
     public function reject(Request $request, $id)
     {
+        // Hanya super-admin yang boleh menolak surat
+        if (!$request->user()->hasRole('super-admin')) {
+            return response()->json(['message' => 'Hanya Kepala Desa yang dapat menolak surat'], 403);
+        }
+
         $surat = Surat::findOrFail($id);
         $surat->update(['status' => 'DITOLAK']);
 
@@ -110,6 +120,6 @@ class SuratController extends Controller
             return response()->json(['message' => 'File tidak ditemukan'], 404);
         }
 
-        return Storage::disk('public')->download($surat->file_path);
+        return response()->download(Storage::disk('public')->path($surat->file_path));
     }
 }

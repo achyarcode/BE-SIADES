@@ -8,82 +8,120 @@ use Illuminate\Validation\Rule;
 class UserController extends Controller
 {
     /**
-     * GET /admin/warga
+     * GET /admin/users
      * List all warga (citizens) with search and pagination
      */
     public function index(Request $request)
     {
-        $query = User::role('user')->orWhere(function ($q) {
-            $q->whereDoesntHave('roles');
+        $query = User::query();
+
+        // Only show users with 'warga' role, or no roles (unassigned citizens)
+        $query->where(function ($q) {
+            $q->whereHas('roles', function ($rq) {
+                $rq->where('name', 'warga');
+            })->orWhereDoesntHave('roles');
         });
 
+        // Search filter
         if ($request->search) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('username', 'like', '%' . $request->search . '%')
-                  ->orWhere('nik', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('username', 'like', '%' . $search . '%')
+                  ->orWhere('nik', 'like', '%' . $search . '%');
+            });
         }
 
-        return response()->json($query->paginate($request->limit ?? 10));
+        // RT filter
+        if ($request->rt) {
+            $query->where('rt', $request->rt);
+        }
+
+        // RW filter
+        if ($request->rw) {
+            $query->where('rw', $request->rw);
+        }
+
+        return response()->json(
+            $query->paginate($request->limit ?? 10)->through(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'namaLengkap' => $user->name,
+                    'nomorWA' => $user->no_telp,
+                    'jenisKelamin' => $user->jenis_kelamin === 'Laki-laki' ? 'L' : 'P',
+                    'alamat' => $user->alamat,
+                    'rt' => $user->rt,
+                    'rw' => $user->rw,
+                    'nik' => $user->nik,
+                    'tempatLahir' => $user->tempat_lahir,
+                    'tanggalLahir' => $user->tanggal_lahir,
+                    'email' => $user->email,
+                ];
+            })
+        );
     }
 
     /**
-     * POST /admin/warga
+     * POST /admin/users
      * Create a new warga (citizen) user
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|unique:users|max:255',
-            'password' => 'required|string|min:6',
-            'nik' => 'required|string|size:16|unique:users',
+            'namaLengkap' => 'required|string|max:255',
+            'username' => 'required|string|unique:users,username|max:255',
+            'password' => 'nullable|string|min:6', // Optional, defaults to 'password123' if empty
+            'nik' => 'required|string|size:16|unique:users,nik',
             'no_kk' => 'nullable|string|size:16',
-            'no_telp' => 'nullable|string|max:20',
-            'email' => 'nullable|email|unique:users',
+            'nomorWA' => 'nullable|string|max:20',
+            'email' => 'nullable|email|unique:users,email',
             'rt' => 'nullable|string|max:10',
             'rw' => 'nullable|string|max:10',
             'alamat' => 'nullable|string',
-            'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
-            'tempat_lahir' => 'nullable|string|max:255',
-            'tanggal_lahir' => 'nullable|date',
+            'jenisKelamin' => 'nullable|in:L,P',
+            'tempatLahir' => 'nullable|string|max:255',
+            'tanggalLahir' => 'nullable|date',
         ]);
 
         // Create user
         $user = User::create([
-            'name' => $validated['name'],
+            'name' => $validated['namaLengkap'],
             'username' => $validated['username'],
-            'password' => $validated['password'], // Auto-hashed via User model cast
+            'password' => $validated['password'] ?? 'password123', 
             'nik' => $validated['nik'],
             'no_kk' => $validated['no_kk'] ?? null,
-            'no_telp' => $validated['no_telp'] ?? null,
+            'no_telp' => $validated['nomorWA'] ?? null,
             'email' => $validated['email'] ?? null,
             'rt' => $validated['rt'] ?? null,
             'rw' => $validated['rw'] ?? null,
             'alamat' => $validated['alamat'] ?? null,
-            'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
-            'tempat_lahir' => $validated['tempat_lahir'] ?? null,
-            'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,
+            'jenis_kelamin' => ($validated['jenisKelamin'] ?? 'L') === 'L' ? 'Laki-laki' : 'Perempuan',
+            'tempat_lahir' => $validated['tempatLahir'] ?? null,
+            'tanggal_lahir' => $validated['tanggalLahir'] ?? null,
         ]);
 
-        // Assign 'user' role
-        $user->assignRole('user');
+        // Assign 'warga' role (consistency with AuthController)
+        $user->assignRole('warga');
 
         return response()->json([
             'message' => 'Warga berhasil ditambahkan',
-            'user' => $user->load('roles')
+            'user' => [
+                'id' => $user->id,
+                'namaLengkap' => $user->name,
+                'nomorWA' => $user->no_telp,
+            ]
         ], 201);
     }
 
     /**
-     * PUT /admin/warga/{id}
+     * PUT /admin/users/{id}
      * Update an existing warga (citizen) user
      */
-    public function update(Request $request, User $id)
+    public function update(Request $request, User $user)
     {
-        $user = $id;
 
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
+            'namaLengkap' => 'sometimes|string|max:255',
             'username' => [
                 'sometimes',
                 'string',
@@ -98,7 +136,7 @@ class UserController extends Controller
                 Rule::unique('users')->ignore($user->id),
             ],
             'no_kk' => 'nullable|string|size:16',
-            'no_telp' => 'nullable|string|max:20',
+            'nomorWA' => 'nullable|string|max:20',
             'email' => [
                 'nullable',
                 'email',
@@ -107,27 +145,46 @@ class UserController extends Controller
             'rt' => 'nullable|string|max:10',
             'rw' => 'nullable|string|max:10',
             'alamat' => 'nullable|string',
-            'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
-            'tempat_lahir' => 'nullable|string|max:255',
-            'tanggal_lahir' => 'nullable|date',
+            'jenisKelamin' => 'nullable|in:L,P',
+            'tempatLahir' => 'nullable|string|max:255',
+            'tanggalLahir' => 'nullable|date',
         ]);
 
-        // Update user (password will be auto-hashed if present)
-        $user->update($validated);
+        // Map fields to database columns
+        $data = [];
+        if (isset($validated['namaLengkap'])) $data['name'] = $validated['namaLengkap'];
+        if (isset($validated['username'])) $data['username'] = $validated['username'];
+        if (isset($validated['password'])) $data['password'] = $validated['password'];
+        if (isset($validated['nik'])) $data['nik'] = $validated['nik'];
+        if (isset($validated['no_kk'])) $data['no_kk'] = $validated['no_kk'];
+        if (isset($validated['nomorWA'])) $data['no_telp'] = $validated['nomorWA'];
+        if (isset($validated['email'])) $data['email'] = $validated['email'];
+        if (isset($validated['rt'])) $data['rt'] = $validated['rt'];
+        if (isset($validated['rw'])) $data['rw'] = $validated['rw'];
+        if (isset($validated['alamat'])) $data['alamat'] = $validated['alamat'];
+        if (isset($validated['jenisKelamin'])) $data['jenis_kelamin'] = $validated['jenisKelamin'] === 'L' ? 'Laki-laki' : 'Perempuan';
+        if (isset($validated['tempatLahir'])) $data['tempat_lahir'] = $validated['tempatLahir'];
+        if (isset($validated['tanggalLahir'])) $data['tanggal_lahir'] = $validated['tanggalLahir'];
+
+        // Update user
+        $user->update($data);
 
         return response()->json([
             'message' => 'Warga berhasil diperbarui',
-            'user' => $user->load('roles')
+            'user' => [
+                'id' => $user->id,
+                'namaLengkap' => $user->name,
+                'nomorWA' => $user->no_telp,
+            ]
         ], 200);
     }
 
     /**
-     * DELETE /admin/warga/{id}
+     * DELETE /admin/users/{id}
      * Delete a warga (citizen) user
      */
-    public function destroy(User $id)
+    public function destroy(User $user)
     {
-        $user = $id;
 
         // Prevent deleting super-admin users
         if ($user->hasRole('super-admin')) {
@@ -147,4 +204,3 @@ class UserController extends Controller
         ], 200);
     }
 }
-

@@ -35,14 +35,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Katalog (Admin)
     Route::get('/admin/katalog', [KatalogController::class, 'index']);
     Route::delete('/admin/katalog/{id}', [KatalogController::class, 'destroy']);
+    Route::patch('/admin/katalog/{id}/status', [KatalogController::class, 'updateStatus']);
 
     // Admin Dashboard & Users
     Route::get('/admin/dashboard/stats', [DashboardController::class, 'stats']);
     // Renamed resource: use /admin/users (resource = users)
     Route::get('/admin/users', [UserController::class, 'index']);
     Route::post('/admin/users', [UserController::class, 'store']);
-    Route::put('/admin/users/{id}', [UserController::class, 'update']);
-    Route::delete('/admin/users/{id}', [UserController::class, 'destroy']);
+    Route::put('/admin/users/{user}', [UserController::class, 'update']);
+    Route::delete('/admin/users/{user}', [UserController::class, 'destroy']);
 
     // Persetujuan Surat (Admin)
     Route::get('/admin/persetujuan-surat', [SuratController::class, 'index']);
