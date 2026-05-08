@@ -10,6 +10,11 @@ class AdminSignature extends Model
         'admin_id',
         'signature_name',
         'file_path',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function admin()

@@ -11,6 +11,7 @@ class Katalog extends Model
         'user_id',
         'nama_usaha',
         'kategori',
+        'kategori_katalog_id',
         'deskripsi',
         'harga',
         'satuan',
@@ -21,8 +22,19 @@ class Katalog extends Model
         'harga' => 'decimal:2',
     ];
 
+    /**
+     * Pemilik katalog.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Kategori katalog (lookup table).
+     */
+    public function kategoriKatalog(): BelongsTo
+    {
+        return $this->belongsTo(KategoriKatalog::class);
     }
 }

@@ -10,7 +10,7 @@ class SuratController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Surat::with('user')->orderBy('created_at', 'desc');
+        $query = Surat::with(['user', 'jenisSurat', 'approver'])->orderBy('created_at', 'desc');
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -74,8 +74,9 @@ class SuratController extends Controller
             $surat->file_path = $filePath;
         }
 
-        // 3. Update status
+        // 3. Update status and audit trail
         $surat->status = 'DISETUJUI';
+        $surat->approved_by = $request->user()->id;
         $surat->save();
 
         return response()->json([
@@ -91,8 +92,16 @@ class SuratController extends Controller
             return response()->json(['message' => 'Hanya Kepala Desa yang dapat menolak surat'], 403);
         }
 
+        $request->validate([
+            'alasan_penolakan' => 'nullable|string|max:1000',
+        ]);
+
         $surat = Surat::findOrFail($id);
-        $surat->update(['status' => 'DITOLAK']);
+        $surat->update([
+            'status' => 'DITOLAK',
+            'approved_by' => $request->user()->id,
+            'alasan_penolakan' => $request->alasan_penolakan,
+        ]);
 
         return response()->json($surat);
     }

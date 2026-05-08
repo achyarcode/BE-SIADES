@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admin_signatures', function (Blueprint $table) {
+        Schema::create('kategori_katalogs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('admin_id')->constrained('users')->cascadeOnDelete();
-            $table->string('signature_name');
-            $table->string('file_path');
-            $table->boolean('is_active')->default(false);
+            $table->string('nama')->unique();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('admin_signatures');
+        Schema::dropIfExists('kategori_katalogs');
     }
 };
