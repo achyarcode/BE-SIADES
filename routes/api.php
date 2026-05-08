@@ -57,6 +57,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Katalog (Warga)
     Route::post('/warga/katalog', [KatalogController::class, 'store']);
 
+    // Manajemen Perangkat Desa (Strictly Super Admin)
+    Route::middleware(['role:super-admin'])->group(function () {
+        Route::get('/admin/perangkat-desa', [\App\Http\Controllers\PerangkatDesaController::class, 'index']);
+        Route::get('/admin/perangkat-desa/search', [\App\Http\Controllers\PerangkatDesaController::class, 'search']);
+        Route::post('/admin/perangkat-desa/assign', [\App\Http\Controllers\PerangkatDesaController::class, 'assignRole']);
+        Route::post('/admin/perangkat-desa/revoke/{user}', [\App\Http\Controllers\PerangkatDesaController::class, 'revokeRole']);
+    });
+
 });
 
 // Fallback for unauthorized redirects from Sanctum
