@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('katalogs', function (Blueprint $table) {
             $table->id();
+            // Relasi ke tabel users: Untuk melacak siapa pemilik produk ini
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); 
+            
+            $table->string('nama_produk');
+            $table->text('deskripsi')->nullable();
+            $table->integer('harga')->nullable(); // Boleh kosong jika harganya nego
+            $table->string('gambar')->nullable(); // Menyimpan nama file foto produk
+            $table->string('kontak_wa')->nullable(); // Nomor WA penjual untuk dihubungi pembeli
             $table->timestamps();
         });
     }

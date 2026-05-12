@@ -6,10 +6,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\KatalogController;
 
 // URL PUBLIC (Tidak perlu token untuk akses ini)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/katalog', [KatalogController::class, 'index']);
 
 // URL PROTECTED (Wajib bawa token Sanctum untuk akses ini)
 Route::middleware('auth:sanctum')->group(function () {
@@ -36,6 +38,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Pengajuan Surat (Warga)
     Route::post('/warga/pengajuan-surat', [SuratController::class, 'store']);
+
+    // ROUTE E-KATALOG (Wajib Login)
+    Route::post('/katalog', [KatalogController::class, 'store']); // Tambah produk
+    Route::put('/katalog/{id}', [KatalogController::class, 'update']); // Edit produk
+    Route::delete('/katalog/{id}', [KatalogController::class, 'destroy']); // Hapus produk
 
 });
 
