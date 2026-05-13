@@ -13,14 +13,6 @@ return new class extends Migration
     {
         Schema::create('katalogs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('nama_usaha');
-            $table->string('kategori');
-            $table->foreignId('kategori_katalog_id')->nullable()->constrained('kategori_katalogs')->nullOnDelete();
-            $table->text('deskripsi')->nullable();
-            $table->decimal('harga', 12, 2)->nullable();
-            $table->string('satuan')->nullable();
-            $table->string('status')->default('PENDING');
             // Relasi ke tabel users: Untuk melacak siapa pemilik produk ini
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); 
             
