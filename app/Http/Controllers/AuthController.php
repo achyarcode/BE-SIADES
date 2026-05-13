@@ -9,9 +9,9 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    // ==========================================
+    
     // 1. FITUR REGISTRASI (KHUSUS WARGA)
-    // ==========================================
+    
     public function register(Request $request)
     {
         // a. Validasi input dari Frontend
@@ -54,9 +54,9 @@ class AuthController extends Controller
         ], 201); // 201 adalah kode HTTP untuk "Created" (Berhasil Dibuat)
     }
 
-    // ==========================================
+    
     // 2. FITUR LOGIN
-    // ==========================================
+    
     public function login(Request $request)
     {
         // a. Validasi: Sekarang kita pakai username, bukan NIK
@@ -93,9 +93,9 @@ class AuthController extends Controller
         ], 200); // 200 adalah kode HTTP untuk "OK" (Sukses)
     }
 
-    // ==========================================
+    
     // 3. FITUR LOGOUT
-    // ==========================================
+    
     public function logout(Request $request)
     {
         // Hapus token yang sedang digunakan saat ini (Logout)

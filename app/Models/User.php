@@ -43,4 +43,10 @@ class User extends Authenticatable
             'password' => 'hashed', // Otomatis meng-enkripsi/hash password saat disimpan
         ];
     }
+
+    // Relasi: 1 User (Warga) bisa punya BANYAK Katalog
+    public function katalogs()
+    {
+        return $this->hasMany(Katalog::class, 'user_id');
+    }
 }
