@@ -18,14 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('username')->unique();
             $table->string('no_telp')->nullable();
-            $table->string('rt', 10)->nullable();
-            $table->string('rw', 10)->nullable();
-            $table->text('alamat')->nullable();
-            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan'])->nullable();
-            $table->string('tempat_lahir')->nullable();
-            $table->date('tanggal_lahir')->nullable();
             $table->string('password');
-            $table->string('email')->nullable()->unique();
             $table->rememberToken();
             $table->timestamps();
         });
