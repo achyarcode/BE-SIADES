@@ -12,7 +12,6 @@ use App\Http\Controllers\KatalogController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/katalog', [KatalogController::class, 'publicIndex']);
-Route::get('/katalog', [KatalogController::class, 'index']);
 
 // URL PROTECTED (Wajib bawa token Sanctum untuk akses ini)
 Route::middleware('auth:sanctum')->group(function () {
