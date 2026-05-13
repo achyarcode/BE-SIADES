@@ -20,6 +20,13 @@ class User extends Authenticatable
         'name', 
         'username', 
         'no_telp', 
+        'email',
+        'rt',
+        'rw',
+        'alamat',
+        'jenis_kelamin',
+        'tempat_lahir',
+        'tanggal_lahir',
         'password'
     ];
 
