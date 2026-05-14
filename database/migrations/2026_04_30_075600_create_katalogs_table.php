@@ -13,14 +13,23 @@ return new class extends Migration
     {
         Schema::create('katalogs', function (Blueprint $table) {
             $table->id();
-            // Relasi ke tabel users: Untuk melacak siapa pemilik produk ini
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); 
-            
+
+            // Owner of the katalog entry
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+
+            // Optional category reference
+            $table->foreignId('kategori_katalog_id')->nullable()->constrained('kategori_katalogs')->nullOnDelete();
+
+            // Product fields (match App\Models\Katalog->\$fillable)
             $table->string('nama_produk');
             $table->text('deskripsi')->nullable();
-            $table->integer('harga')->nullable(); // Boleh kosong jika harganya nego
-            $table->string('gambar')->nullable(); // Menyimpan nama file foto produk
-            $table->string('kontak_wa')->nullable(); // Nomor WA penjual untuk dihubungi pembeli
+            $table->decimal('harga', 12, 2)->nullable();
+            $table->string('gambar')->nullable();
+            $table->string('kontak_wa')->nullable();
+
+            // Status values use standardized uppercase labels
+            $table->string('status')->default('MENUNGGU');
+
             $table->timestamps();
         });
     }

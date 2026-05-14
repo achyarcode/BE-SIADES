@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tagihans', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('katalogs', function (Blueprint $table) {
+            $table->string('warga_status')->default('AKTIF')->after('status');
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tagihans');
+        Schema::table('katalogs', function (Blueprint $table) {
+            $table->dropColumn('warga_status');
+        });
     }
 };
