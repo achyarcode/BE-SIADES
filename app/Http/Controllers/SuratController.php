@@ -30,8 +30,8 @@ class SuratController extends Controller
                 'id' => $surat->id,
                 'user_id' => $surat->user_id,
                 'nama_pemohon' => $surat->nama_pemohon,
-                // Keep this field as plain text for FE table compatibility.
-                'jenis_surat' => $surat->getAttribute('jenis_surat') ?: optional($surat->jenisSurat)->nama,
+                // Keep plain-text field for FE compatibility, sourced from lookup relation.
+                'jenis_surat' => optional($surat->jenisSurat)->nama,
                 'jenis_surat_id' => $surat->jenis_surat_id,
                 'keperluan' => $surat->keperluan,
                 'keterangan' => $surat->keterangan,
@@ -81,8 +81,7 @@ class SuratController extends Controller
         $surat = Surat::create([
             'user_id' => $request->user()->id,
             'nama_pemohon' => $request->user()->name,
-            'jenis_surat' => $validated['jenis_surat'],
-            'jenis_surat_id' => JenisSurat::where('nama', $validated['jenis_surat'])->value('id'),
+            'jenis_surat_id' => $this->resolveJenisSuratId($validated),
             'keperluan' => $validated['keperluan'] ?? '-',
             'file_path' => $filePath,
             'original_filename' => $originalFilename,
@@ -196,5 +195,22 @@ class SuratController extends Controller
         $downloadName = $baseName.'.'.$ext;
 
         return response()->download(Storage::disk('public')->path($surat->file_path), $downloadName);
+    }
+
+    private function resolveJenisSuratId(array $validated): int
+    {
+        if (! empty($validated['jenis_surat_id'])) {
+            return (int) $validated['jenis_surat_id'];
+        }
+
+        $name = trim((string) ($validated['jenis_surat'] ?? ''));
+        if ($name === '') {
+            $name = 'Lainnya';
+        }
+
+        return (int) JenisSurat::query()->firstOrCreate(
+            ['nama' => $name],
+            ['deskripsi' => null, 'is_active' => true]
+        )->id;
     }
 }

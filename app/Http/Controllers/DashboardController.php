@@ -24,10 +24,20 @@ class DashboardController extends Controller
 
         $totalPengajuan = Surat::where('user_id', $userId)->count();
         $suratSelesai = Surat::where('user_id', $userId)->where('status', 'DISETUJUI')->count();
-        $recentSurat = Surat::where('user_id', $userId)
+        $recentSurat = Surat::with('jenisSurat:id,nama')
+            ->where('user_id', $userId)
             ->orderBy('created_at', 'desc')
             ->limit(5)
-            ->get(['id', 'jenis_surat', 'created_at', 'status']);
+            ->get(['id', 'jenis_surat_id', 'created_at', 'status'])
+            ->map(function (Surat $surat) {
+                return [
+                    'id' => $surat->id,
+                    'jenis_surat' => optional($surat->jenisSurat)->nama ?? 'Lainnya',
+                    'created_at' => $surat->created_at,
+                    'status' => $surat->status,
+                ];
+            })
+            ->values();
 
         return response()->json([
             'totalPengajuan' => $totalPengajuan,
