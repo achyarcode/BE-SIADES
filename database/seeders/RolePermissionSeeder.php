@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
-use App\Models\User;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -16,7 +17,7 @@ class RolePermissionSeeder extends Seeder
         // - warga: Warga biasa
         $roles = ['super-admin', 'admin', 'warga'];
         $guards = ['web', 'sanctum'];
-        
+
         foreach ($roles as $role) {
             foreach ($guards as $guard) {
                 Role::firstOrCreate(['name' => $role, 'guard_name' => $guard]);
@@ -25,12 +26,12 @@ class RolePermissionSeeder extends Seeder
 
         // 2. Migrasi role lama → admin (jika masih ada di database)
         foreach (['sekretaris', 'bendahara'] as $oldRole) {
-            if (!Role::where('name', $oldRole)->exists()) {
+            if (! Role::where('name', $oldRole)->exists()) {
                 continue;
             }
             foreach (User::role($oldRole)->get() as $user) {
                 $user->removeRole($oldRole);
-                if (!$user->hasRole('admin')) {
+                if (! $user->hasRole('admin')) {
                     $user->assignRole('admin');
                 }
             }
@@ -44,7 +45,7 @@ class RolePermissionSeeder extends Seeder
         $admin = User::firstOrCreate(
             ['username' => 'kepaladesa'],
             [
-                'nik' => '1234567890123456', 
+                'nik' => '1234567890123456',
                 'no_kk' => '1234567890000000',
                 'name' => 'Kepala Desa',
                 'no_telp' => '081234567890',
@@ -53,12 +54,12 @@ class RolePermissionSeeder extends Seeder
         );
 
         // 4. Tempelkan jabatan
-        if (!$admin->hasRole('super-admin')) {
+        if (! $admin->hasRole('super-admin')) {
             $admin->assignRole('super-admin');
         }
 
         // Reset cache
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $this->command->info('Roles: super-admin, admin, warga');
         $this->command->info('Admin account: kepaladesa / password123');

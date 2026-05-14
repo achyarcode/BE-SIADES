@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\JenisSurat;
 use App\Models\KategoriKatalog;
+use Illuminate\Database\Seeder;
 
 class LookupTableSeeder extends Seeder
 {
@@ -24,7 +24,7 @@ class LookupTableSeeder extends Seeder
             JenisSurat::firstOrCreate(['nama' => $item['nama']], $item);
         }
 
-        $this->command->info('Seeded ' . count($jenisSurats) . ' jenis surat.');
+        $this->command->info('Seeded '.count($jenisSurats).' jenis surat.');
 
         // === Kategori Katalog ===
         $kategoriKatalogs = [
@@ -39,6 +39,6 @@ class LookupTableSeeder extends Seeder
             KategoriKatalog::firstOrCreate(['nama' => $item['nama']], $item);
         }
 
-        $this->command->info('Seeded ' . count($kategoriKatalogs) . ' kategori katalog.');
+        $this->command->info('Seeded '.count($kategoriKatalogs).' kategori katalog.');
     }
 }

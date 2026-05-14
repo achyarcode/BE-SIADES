@@ -2,24 +2,25 @@
 
 namespace App\Models;
 
-use Spatie\Permission\Traits\HasRoles;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, HasRoles; 
+    /** @use HasFactory<UserFactory> */
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     // 1. Fillable: buat mendaftarkan kolom apa saja yang BOLEH diisi dari form/request
     protected $fillable = [
-        'nik', 
-        'no_kk', 
-        'name', 
-        'username', 
-        'no_telp', 
+        'nik',
+        'no_kk',
+        'name',
+        'username',
+        'no_telp',
         'email',
         'rt',
         'rw',
@@ -27,7 +28,9 @@ class User extends Authenticatable
         'jenis_kelamin',
         'tempat_lahir',
         'tanggal_lahir',
-        'password'
+        'password',
+        'must_update_credentials',
+        'credentials_updated_at',
     ];
 
     // 2. Hidden: Menyembunyikan kolom ini ketika data User dipanggil di API
@@ -41,6 +44,8 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed', // Otomatis meng-enkripsi/hash password saat disimpan
+            'must_update_credentials' => 'boolean',
+            'credentials_updated_at' => 'datetime',
         ];
     }
 

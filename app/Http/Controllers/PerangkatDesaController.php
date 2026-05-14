@@ -20,8 +20,8 @@ class PerangkatDesaController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('username', 'like', "%{$search}%")
-                  ->orWhere('nik', 'like', "%{$search}%");
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhere('nik', 'like', "%{$search}%");
             });
         }
 
@@ -44,8 +44,8 @@ class PerangkatDesaController extends Controller
     public function search(Request $request)
     {
         $query = $request->get('q');
-        
-        if (!$query) {
+
+        if (! $query) {
             return response()->json([]);
         }
 
@@ -57,7 +57,7 @@ class PerangkatDesaController extends Controller
             ->get(['id', 'name', 'username', 'nik']);
 
         // Attach their current role
-        $users->each(function($user) {
+        $users->each(function ($user) {
             $user->current_role = $user->roles->pluck('name')->first() ?? 'warga';
         });
 
@@ -71,11 +71,11 @@ class PerangkatDesaController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'role' => 'required|in:admin,super-admin'
+            'role' => 'required|in:admin,super-admin',
         ]);
 
         $user = User::findOrFail($request->user_id);
-        
+
         // Synchronize to the new role (removes other roles)
         $user->syncRoles([$request->role]);
 

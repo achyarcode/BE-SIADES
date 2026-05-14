@@ -15,6 +15,7 @@ class Surat extends Model
         'keperluan',
         'keterangan',
         'file_path',
+        'original_filename',
         'signature_position',
         'status',
         'approved_by',
