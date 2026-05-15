@@ -8,10 +8,13 @@ use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\PerangkatDesaController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\StrukturDesaController; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// ==========================================
 // URL PUBLIC (Tidak perlu token untuk akses ini)
+// ==========================================
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
@@ -19,7 +22,14 @@ Route::post('/verify-reset-otp', [AuthController::class, 'verifyResetOtp']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/katalog', [KatalogController::class, 'publicIndex']);
 
+// TAMPILKAN STRUKTUR DESA UNTUK PUBLIK (TAMBAHAN BARU)
+Route::get('/struktur-desa', [StrukturDesaController::class, 'index']);
+Route::get('/struktur-desa/{id}', [StrukturDesaController::class, 'show']);
+
+
+// ==========================================
 // URL PROTECTED (Wajib bawa token Sanctum untuk akses ini)
+// ==========================================
 Route::middleware('auth:sanctum')->group(function () {
 
     // Cek profil user yang sedang login
@@ -37,7 +47,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/warga/profile', [UserController::class, 'updateProfile']);
     Route::post('/warga/account/setup', [AuthController::class, 'setupWargaCredentials']);
 
+    // AREA KHUSUS ADMIN & SUPER ADMIN
     Route::middleware(['role:admin|super-admin'])->group(function () {
+        
+        // MANAJEMEN STRUKTUR DESA (TAMBAHAN BARU)
+        Route::post('/admin/struktur-desa', [StrukturDesaController::class, 'store']);
+        Route::put('/admin/struktur-desa/{id}', [StrukturDesaController::class, 'update']);
+        Route::delete('/admin/struktur-desa/{id}', [StrukturDesaController::class, 'destroy']);
+
         // Admin Signatures
         Route::get('/admin/signatures', [AdminSignatureController::class, 'index']);
         Route::post('/admin/signatures', [AdminSignatureController::class, 'store']);
