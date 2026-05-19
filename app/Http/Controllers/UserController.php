@@ -22,6 +22,17 @@ class UserController extends Controller
             'nomorkk' => $user->no_kk,
             'username' => $user->username,
             'alamat' => $user->alamat,
+            'nomorWA' => $user->no_telp,
+            'rt' => $user->rt,
+            'rw' => $user->rw,
+            'jenisKelamin' => match ($user->jenis_kelamin) {
+                'Laki-laki' => 'L',
+                'Perempuan' => 'P',
+                default => '-',
+            },
+            'tempatLahir' => $user->tempat_lahir,
+            'tanggalLahir' => $user->tanggal_lahir,
+            'email' => $user->email,
             'mustUpdateCredentials' => (bool) $user->must_update_credentials,
         ]);
     }
@@ -31,11 +42,24 @@ class UserController extends Controller
         $validated = $request->validated();
         $user = $request->user();
 
+        $jenisKelamin = null;
+        if (isset($validated['jenisKelamin'])) {
+            $jenisKelamin = $validated['jenisKelamin'] === 'L' ? 'Laki-laki' : 'Perempuan';
+        }
+
+        // Menggunakan array_key_exists memastikan data diperbarui sesuai apa yang dikirim dari form frontend
         $user->update([
             'name' => $validated['namaLengkap'],
             'username' => $validated['username'],
-            'no_kk' => $validated['nomorkk'] ?? null,
-            'alamat' => $validated['alamat'] ?? null,
+            'no_kk' => array_key_exists('nomorkk', $validated) ? $validated['nomorkk'] : $user->no_kk,
+            'alamat' => array_key_exists('alamat', $validated) ? $validated['alamat'] : $user->alamat,
+            'no_telp' => array_key_exists('nomorWA', $validated) ? $validated['nomorWA'] : $user->no_telp,
+            'rt' => array_key_exists('rt', $validated) ? $validated['rt'] : $user->rt,
+            'rw' => array_key_exists('rw', $validated) ? $validated['rw'] : $user->rw,
+            'jenis_kelamin' => $jenisKelamin ?? $user->jenis_kelamin,
+            'tempat_lahir' => array_key_exists('tempatLahir', $validated) ? $validated['tempatLahir'] : $user->tempat_lahir,
+            'tanggal_lahir' => array_key_exists('tanggalLahir', $validated) ? $validated['tanggalLahir'] : $user->tanggal_lahir,
+            'email' => array_key_exists('email', $validated) ? $validated['email'] : $user->email,
         ]);
 
         return response()->json([
@@ -47,6 +71,18 @@ class UserController extends Controller
                 'nomorkk' => $user->no_kk,
                 'username' => $user->username,
                 'alamat' => $user->alamat,
+                'nomorWA' => $user->no_telp, // Menampilkan data terbaru dari database
+                'rt' => $user->rt,
+                'rw' => $user->rw,
+                'jenisKelamin' => match ($user->jenis_kelamin) {
+                    'Laki-laki' => 'L',
+                    'Perempuan' => 'P',
+                    default => '-',
+                },
+                'tempatLahir' => $user->tempat_lahir,
+                'tanggalLahir' => $user->tanggal_lahir,
+                'email' => $user->email,
+                'mustUpdateCredentials' => (bool) $user->must_update_credentials,
             ],
         ]);
     }

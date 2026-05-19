@@ -12,6 +12,9 @@ use App\Http\Controllers\Api\StrukturDesaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+
+Route::post('/forgot-password', [AuthController::class, 'sendOtp']);
+Route::post('/verify-reset-otp', [AuthController::class, 'verifyOtp']);
 // ==========================================
 // URL PUBLIC (Tidak perlu token untuk akses ini)
 // ==========================================
