@@ -38,7 +38,15 @@ class AuthController extends Controller
             'nik' => $validated['nik'],
             'no_kk' => $validated['no_kk'] ?? null,
             'no_telp' => $validated['no_telp'] ?? null,
-            'jenis_kelamin' => $validated['jenisKelamin'] === 'L' ? 'Laki-laki' : 'Perempuan',
+            'jenis_kelamin' => isset($validated['jenisKelamin']) 
+             ? $validated['jenisKelamin']=== 'L' ? 'Laki-laki' : 'Perempuan' 
+             : null,
+            'email' => $validated['email'] ?? null,
+            'rt' => $validated['rt'] ?? null,
+            'rw' => $validated['rw'] ?? null,
+            'alamat' => $validated['alamat'] ?? null,
+            'tempat_lahir' => $validated['tempatLahir'] ?? null,
+            'tanggal_lahir' => $validated['tanggalLahir'] ?? null,
         ]);
 
         // c. Berikan Hak Akses (Role) Otomatis sebagai warga
@@ -184,10 +192,14 @@ class AuthController extends Controller
             'user_id' => $payload['user_id'],
         ], now()->addMinutes(self::RESET_TOKEN_TTL_MINUTES));
 
+        // --- BAGIAN INI YANG DIUBAH AGAR MATCH DENGAN FRONTEND ---
         return $this->success('OTP terverifikasi.', [
-            'reset_token' => $resetToken,
-            'expires_in_seconds' => self::RESET_TOKEN_TTL_MINUTES * 60,
+            'data' => [
+                'reset_token' => $resetToken,
+                'expires_in_seconds' => self::RESET_TOKEN_TTL_MINUTES * 60,
+            ]
         ]);
+        // ---------------------------------------------------------
     }
 
     public function resetPassword(Request $request)
