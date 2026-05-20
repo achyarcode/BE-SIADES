@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminSignatureController;
+use App\Http\Controllers\AdminStampController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisSuratController;
@@ -42,6 +43,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/signatures', [AdminSignatureController::class, 'index']);
         Route::post('/admin/signatures', [AdminSignatureController::class, 'store']);
         Route::delete('/admin/signatures/{id}', [AdminSignatureController::class, 'destroy']);
+
+        // Admin Stamps
+        Route::get('/admin/stamps', [AdminStampController::class, 'index']);
+        Route::post('/admin/stamps', [AdminStampController::class, 'store']);
+        Route::delete('/admin/stamps/{id}', [AdminStampController::class, 'destroy']);
 
         // Katalog (Admin)
         Route::get('/admin/katalog', [KatalogController::class, 'index']);
