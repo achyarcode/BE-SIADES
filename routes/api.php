@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\Route;
 // URL PUBLIC (Tidak perlu token untuk akses ini)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('/verify-reset-otp', [AuthController::class, 'verifyResetOtp']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
+Route::post('/verify-reset-otp', [AuthController::class, 'verifyResetOtp'])->middleware('throttle:5,1');
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/katalog', [KatalogController::class, 'publicIndex']);
 
