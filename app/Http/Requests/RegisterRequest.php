@@ -21,6 +21,13 @@ class RegisterRequest extends FormRequest
             'no_kk' => 'nullable|string|size:16',
             'no_telp' => 'nullable|string|max:20',
             'jenisKelamin' => 'required|in:L,P',
+            'email' => 'nullable|email|unique:users,email|max:255',
+            'rt' => 'nullable|string|max:10',
+            'rw' => 'nullable|string|max:10',
+            'alamat' => 'nullable|string',
+            'tempatLahir' => 'nullable|string|max:100',
+            'tanggalLahir' => 'nullable|date',
+
         ];
     }
 }

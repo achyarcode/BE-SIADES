@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('katalogs', function (Blueprint $table) {
-            $table->string('warga_status')->default('AKTIF')->after('status');
+            $table->string('warga_status')->default('AKTIF');
         });
     }
 

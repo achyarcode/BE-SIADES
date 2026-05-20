@@ -9,6 +9,18 @@ class UserUpdateRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
+        // TAMBAHKAN BARIS INI UNTUK TESTING:
+        dd($this->all());
+
+        if ($this->has('jenis_kelamin')) {
+            $this->merge(['jenisKelamin' => $this->input('jenis_kelamin')]);
+        }
+
+        // 1. Antisipasi jika frontend mengirimkan dalam format snake_case (jenis_kelamin)
+        if ($this->has('jenis_kelamin')) {
+            $this->merge(['jenisKelamin' => $this->input('jenis_kelamin')]);
+        }
+
         $nullableFields = [
             'no_kk',
             'nomorWA',
@@ -33,6 +45,16 @@ class UserUpdateRequest extends FormRequest
                     $this->request->remove($field);
 
                     continue;
+                }
+
+                // 2. PERBAIKAN LOGIKA: Ubah kata utuh menjadi inisial L/P untuk keperluan validator
+                if ($field === 'jenisKelamin') {
+                    $lowerValue = strtolower($value);
+                    if ($lowerValue === 'laki-laki' || $lowerValue === 'laki - laki' || $lowerValue === 'l') {
+                        $value = 'L';
+                    } elseif ($lowerValue === 'perempuan' || $lowerValue === 'p') {
+                        $value = 'P';
+                    }
                 }
 
                 $normalized[$field] = $value === '' && in_array($field, $nullableFields, true) ? null : $value;
@@ -63,7 +85,7 @@ class UserUpdateRequest extends FormRequest
             'rt' => 'nullable|string|max:10',
             'rw' => 'nullable|string|max:10',
             'alamat' => 'nullable|string',
-            'jenisKelamin' => 'nullable|in:L,P',
+            'jenisKelamin' => 'nullable|in:L,P', // Sekarang dijamin cocok karena input sudah dikonversi ke L/P
             'tempatLahir' => 'nullable|string|max:255',
             'tanggalLahir' => 'nullable|date',
             'mustUpdateCredentials' => 'nullable|boolean',

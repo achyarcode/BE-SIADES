@@ -39,7 +39,15 @@ class AuthController extends Controller
             'nik' => $validated['nik'],
             'no_kk' => $validated['no_kk'] ?? null,
             'no_telp' => $validated['no_telp'] ?? null,
-            'jenis_kelamin' => $validated['jenisKelamin'] === 'L' ? 'Laki-laki' : 'Perempuan',
+            'jenis_kelamin' => isset($validated['jenisKelamin'])
+                ? ($validated['jenisKelamin'] === 'L' ? 'Laki-laki' : 'Perempuan')
+                : null,
+            'email' => $validated['email'] ?? null,
+            'rt' => $validated['rt'] ?? null,
+            'rw' => $validated['rw'] ?? null,
+            'alamat' => $validated['alamat'] ?? null,
+            'tempat_lahir' => $validated['tempatLahir'] ?? null,
+            'tanggal_lahir' => $validated['tanggalLahir'] ?? null,
         ]);
 
         // c. Berikan Hak Akses (Role) Otomatis sebagai warga
