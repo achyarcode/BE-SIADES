@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminSignatureController;
 use App\Http\Controllers\AdminStampController;
+use App\Http\Controllers\Api\StrukturDesaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisSuratController;
@@ -19,6 +20,8 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->midd
 Route::post('/verify-reset-otp', [AuthController::class, 'verifyResetOtp'])->middleware('throttle:5,1');
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/katalog', [KatalogController::class, 'publicIndex']);
+Route::get('/struktur-desa', [StrukturDesaController::class, 'index']);
+Route::get('/struktur-desa/{id}', [StrukturDesaController::class, 'show']);
 
 // URL PROTECTED (Wajib bawa token Sanctum untuk akses ini)
 Route::middleware('auth:sanctum')->group(function () {
@@ -48,6 +51,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/stamps', [AdminStampController::class, 'index']);
         Route::post('/admin/stamps', [AdminStampController::class, 'store']);
         Route::delete('/admin/stamps/{id}', [AdminStampController::class, 'destroy']);
+
+        // Struktur Desa
+        Route::post('/admin/struktur-desa', [StrukturDesaController::class, 'store']);
+        Route::put('/admin/struktur-desa/{id}', [StrukturDesaController::class, 'update']);
+        Route::delete('/admin/struktur-desa/{id}', [StrukturDesaController::class, 'destroy']);
 
         // Katalog (Admin)
         Route::get('/admin/katalog', [KatalogController::class, 'index']);
