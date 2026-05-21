@@ -9,13 +9,6 @@ class UserUpdateRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
-        // TAMBAHKAN BARIS INI UNTUK TESTING:
-        dd($this->all());
-
-        if ($this->has('jenis_kelamin')) {
-            $this->merge(['jenisKelamin' => $this->input('jenis_kelamin')]);
-        }
-
         // 1. Antisipasi jika frontend mengirimkan dalam format snake_case (jenis_kelamin)
         if ($this->has('jenis_kelamin')) {
             $this->merge(['jenisKelamin' => $this->input('jenis_kelamin')]);

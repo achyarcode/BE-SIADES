@@ -39,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/jenis-surat', [JenisSuratController::class, 'index']);
     Route::get('/warga/profile', [UserController::class, 'profile']);
     Route::put('/warga/profile', [UserController::class, 'updateProfile']);
+    Route::post('/warga/profile/photo', [UserController::class, 'updateProfilePhoto']);
     Route::post('/warga/account/setup', [AuthController::class, 'setupWargaCredentials']);
 
     Route::middleware(['role:admin|super-admin'])->group(function () {

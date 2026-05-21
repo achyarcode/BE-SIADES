@@ -48,6 +48,7 @@ class AuthController extends Controller
             'alamat' => $validated['alamat'] ?? null,
             'tempat_lahir' => $validated['tempatLahir'] ?? null,
             'tanggal_lahir' => $validated['tanggalLahir'] ?? null,
+            'is_resident' => true,
         ]);
 
         // c. Berikan Hak Akses (Role) Otomatis sebagai warga
