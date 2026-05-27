@@ -8,6 +8,11 @@ class UserStoreRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
+        // Map nomorKK (camelCase dari frontend) ke no_kk (snake_case untuk database)
+        if ($this->has('nomorKK') && !$this->has('no_kk')) {
+            $this->merge(['no_kk' => $this->input('nomorKK')]);
+        }
+
         $normalized = [];
 
         foreach ([
@@ -15,6 +20,7 @@ class UserStoreRequest extends FormRequest
             'username',
             'nik',
             'no_kk',
+            'nomorKK',
             'nomorWA',
             'email',
             'rt',

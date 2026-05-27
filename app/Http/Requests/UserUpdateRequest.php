@@ -9,21 +9,19 @@ class UserUpdateRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
-        // TAMBAHKAN BARIS INI UNTUK TESTING:
-        dd($this->all()); 
-
-        if ($this->has('jenis_kelamin')) {
-            $this->merge(['jenisKelamin' => $this->input('jenis_kelamin')]);
-        }
-
-
         // 1. Antisipasi jika frontend mengirimkan dalam format snake_case (jenis_kelamin)
         if ($this->has('jenis_kelamin')) {
             $this->merge(['jenisKelamin' => $this->input('jenis_kelamin')]);
         }
 
+        // 2. Map nomorKK (camelCase dari frontend) ke no_kk (snake_case untuk database)
+        if ($this->has('nomorKK') && !$this->has('no_kk')) {
+            $this->merge(['no_kk' => $this->input('nomorKK')]);
+        }
+
         $nullableFields = [
             'no_kk',
+            'nomorKK',
             'nomorWA',
             'email',
             'rt',

@@ -62,6 +62,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/signatures', [AdminSignatureController::class, 'index']);
         Route::post('/admin/signatures', [AdminSignatureController::class, 'store']);
         Route::delete('/admin/signatures/{id}', [AdminSignatureController::class, 'destroy']);
+        Route::get('/admin/signatures/{id}/image', [AdminSignatureController::class, 'showImage']);
+
+        // Admin Stamps
+        Route::get('/admin/stamps', [\App\Http\Controllers\AdminStampController::class, 'index']);
+        Route::post('/admin/stamps', [\App\Http\Controllers\AdminStampController::class, 'store']);
+        Route::delete('/admin/stamps/{id}', [\App\Http\Controllers\AdminStampController::class, 'destroy']);
+        Route::get('/admin/stamps/{id}/image', [\App\Http\Controllers\AdminStampController::class, 'showImage']);
+
 
         // Katalog (Admin)
         Route::get('/admin/katalog', [KatalogController::class, 'index']);
