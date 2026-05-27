@@ -31,6 +31,8 @@ class User extends Authenticatable
         'password',
         'must_update_credentials',
         'credentials_updated_at',
+        'profile_photo',
+        'is_resident',
     ];
 
     // 2. Hidden: Menyembunyikan kolom ini ketika data User dipanggil di API
@@ -46,6 +48,7 @@ class User extends Authenticatable
             'password' => 'hashed', // Otomatis meng-enkripsi/hash password saat disimpan
             'must_update_credentials' => 'boolean',
             'credentials_updated_at' => 'datetime',
+            'is_resident' => 'boolean',
         ];
     }
 

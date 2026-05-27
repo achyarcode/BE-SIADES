@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'otp' => [
+        'channel' => env('OTP_CHANNEL', 'log'),
+    ],
+
+    'gowa' => [
+        'endpoint' => env('GOWA_ENDPOINT', 'http://103.177.95.67:2626/send/message'),
+        'username' => env('GOWA_USERNAME'),
+        'password' => env('GOWA_PASSWORD'),
+        'device_id' => env('GOWA_DEVICE_ID'),
+        'timeout' => env('GOWA_TIMEOUT', 10),
+    ],
+
 ];

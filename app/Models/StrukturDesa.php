@@ -16,6 +16,6 @@ class StrukturDesa extends Model
         'rt',
         'alamat',
         'no_wa',
-        'foto'
+        'foto',
     ];
 }

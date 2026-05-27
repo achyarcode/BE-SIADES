@@ -121,7 +121,7 @@ class KatalogController extends Controller
             'nama_produk' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'harga' => 'nullable|numeric',
-            'kontak_wa' => 'nullable|string|max:15',
+            'kontak_wa' => ['nullable', 'regex:/^08\d{8,11}$/'],
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 

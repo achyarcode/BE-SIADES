@@ -12,7 +12,7 @@ class DashboardController extends Controller
     public function stats()
     {
         return response()->json([
-            'totalWarga' => User::role('warga')->count(),
+            'totalWarga' => User::where('is_resident', true)->count(),
             'suratMenunggu' => Surat::where('status', 'PENDING')->count(),
             'usahaAktif' => Katalog::where('status', Katalog::STATUS_AKTIF)->count(),
         ]);

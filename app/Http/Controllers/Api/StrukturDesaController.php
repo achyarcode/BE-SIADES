@@ -13,9 +13,10 @@ class StrukturDesaController extends Controller
     public function index()
     {
         $struktur = StrukturDesa::all();
+
         return response()->json([
             'success' => true,
-            'data' => $struktur
+            'data' => $struktur,
         ], 200);
     }
 
@@ -29,7 +30,7 @@ class StrukturDesaController extends Controller
             'rt' => 'nullable|string|max:3',
             'alamat' => 'nullable|string',
             'no_wa' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048' // Max 2MB
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
         ]);
 
         $data = $request->all();
@@ -44,7 +45,7 @@ class StrukturDesaController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Data struktur desa berhasil ditambahkan',
-            'data' => $struktur
+            'data' => $struktur,
         ], 201);
     }
 
@@ -52,9 +53,10 @@ class StrukturDesaController extends Controller
     public function show($id)
     {
         $struktur = StrukturDesa::find($id);
-        if (!$struktur) {
+        if (! $struktur) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
+
         return response()->json(['success' => true, 'data' => $struktur], 200);
     }
 
@@ -62,14 +64,14 @@ class StrukturDesaController extends Controller
     public function update(Request $request, $id)
     {
         $struktur = StrukturDesa::find($id);
-        if (!$struktur) {
+        if (! $struktur) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
         $request->validate([
             'nama' => 'sometimes|required|string|max:255',
             'jabatan' => 'sometimes|required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $data = $request->all();
@@ -87,7 +89,7 @@ class StrukturDesaController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Data struktur desa berhasil diperbarui',
-            'data' => $struktur
+            'data' => $struktur,
         ], 200);
     }
 
@@ -95,7 +97,7 @@ class StrukturDesaController extends Controller
     public function destroy($id)
     {
         $struktur = StrukturDesa::find($id);
-        if (!$struktur) {
+        if (! $struktur) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
@@ -107,7 +109,7 @@ class StrukturDesaController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Data struktur desa berhasil dihapus'
+            'message' => 'Data struktur desa berhasil dihapus',
         ], 200);
     }
 }

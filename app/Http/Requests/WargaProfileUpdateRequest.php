@@ -13,7 +13,7 @@ class WargaProfileUpdateRequest extends FormRequest
         if ($this->has('jenis_kelamin')) {
             $this->merge(['jenisKelamin' => $this->input('jenis_kelamin')]);
         }
-        
+
         if ($this->has('no_telp')) {
             $this->merge(['nomorWA' => $this->input('no_telp')]);
         } elseif ($this->has('no_wa')) {
@@ -24,9 +24,9 @@ class WargaProfileUpdateRequest extends FormRequest
 
         $normalized = [];
         foreach ([
-            'namaLengkap', 
-            'username', 
-            'nomorkk', 
+            'namaLengkap',
+            'username',
+            'nomorkk',
             'alamat',
             'nomorWA',
             'email',
@@ -38,10 +38,10 @@ class WargaProfileUpdateRequest extends FormRequest
         ] as $field) {
             if ($this->has($field)) {
                 $value = $this->input($field);
-                
+
                 // PENTING: Paksa konversi ke string jika frontend mengirim format angka (integer)
                 if (is_scalar($value)) {
-                    $value = trim((string)$value);
+                    $value = trim((string) $value);
                 }
 
                 // PROSES KONVERSI JENIS KELAMIN
@@ -74,7 +74,7 @@ class WargaProfileUpdateRequest extends FormRequest
             'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($userId)],
             'nomorkk' => 'nullable|string|size:16',
             'alamat' => 'nullable|string',
-            'nomorWA' => 'nullable|string|max:20', 
+            'nomorWA' => 'nullable|string|max:20',
             'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($userId)],
             'rt' => 'nullable|string|max:10',
             'rw' => 'nullable|string|max:10',

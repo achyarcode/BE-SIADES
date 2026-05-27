@@ -25,5 +25,28 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
-/scripts/
+# Test and Scripts folders
 /tests/
+/scripts/
+
+# Test coverage
+coverage/
+.nyc_output/
+.coverage
+coverage.xml
+*.coverage
+
+# GitHub context files
+/.github/context-*.md
+
+# Local AI/tooling context
+/AGENTS.md
+/.agents/
+/.aider*
+/.claude/
+/.cline/
+/.codex/
+/.context/
+/.cursor/
+/.roo/
+/.windsurf/
