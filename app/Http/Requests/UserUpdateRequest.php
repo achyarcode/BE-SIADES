@@ -94,6 +94,8 @@ class UserUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'nik.unique' => 'NIK sudah digunakan oleh akun lain.',
+            'nik.digits' => 'NIK harus terdiri dari 16 digit angka.',
             'nomorWA.unique' => 'Nomor HP sudah digunakan oleh akun lain.',
             'nomorWA.regex' => 'Nomor HP harus diawali 08 dan terdiri dari 10-13 digit.',
         ];
