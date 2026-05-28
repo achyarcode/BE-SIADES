@@ -10,6 +10,11 @@ class AdminStamp extends Model
         'admin_id',
         'stamp_name',
         'file_path',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function admin()

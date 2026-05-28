@@ -24,7 +24,7 @@ class RegisterRequest extends FormRequest
             'email' => 'nullable|email|unique:users,email|max:255',
             'rt' => 'nullable|string|max:10',
             'rw' => 'nullable|string|max:10',
-            'alamat' => 'nullable|string',
+            'alamat' => 'required|string',
             'tempatLahir' => 'nullable|string|max:100',
             'tanggalLahir' => 'nullable|date',
 

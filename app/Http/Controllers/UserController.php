@@ -161,6 +161,7 @@ class UserController extends Controller
                     'rt' => $user->rt,
                     'rw' => $user->rw,
                     'nik' => $user->nik,
+                    'nomorKK' => $user->no_kk,
                     'tempatLahir' => $user->tempat_lahir,
                     'tanggalLahir' => $user->tanggal_lahir,
                     'email' => $user->email,

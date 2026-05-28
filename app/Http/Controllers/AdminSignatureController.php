@@ -81,4 +81,27 @@ class AdminSignatureController extends Controller
 
         return response()->json(['message' => 'Signature deleted successfully']);
     }
+
+    public function showImage($id)
+    {
+        $signature = AdminSignature::findOrFail($id);
+
+        if ($signature->admin_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $path = $signature->file_path;
+        if (!Storage::disk('public')->exists($path)) {
+            return response()->json(['message' => 'File not found'], 404);
+        }
+
+        $fileData = Storage::disk('public')->get($path);
+        $base64 = base64_encode($fileData);
+        $mime = 'image/png';
+
+        return response()->json([
+            'signature_data' => 'data:' . $mime . ';base64,' . $base64
+        ]);
+    }
 }
+

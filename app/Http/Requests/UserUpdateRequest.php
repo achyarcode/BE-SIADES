@@ -14,8 +14,14 @@ class UserUpdateRequest extends FormRequest
             $this->merge(['jenisKelamin' => $this->input('jenis_kelamin')]);
         }
 
+        // 2. Map nomorKK (camelCase dari frontend) ke no_kk (snake_case untuk database)
+        if ($this->has('nomorKK') && !$this->has('no_kk')) {
+            $this->merge(['no_kk' => $this->input('nomorKK')]);
+        }
+
         $nullableFields = [
             'no_kk',
+            'nomorKK',
             'nomorWA',
             'email',
             'rt',
