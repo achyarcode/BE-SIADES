@@ -23,17 +23,15 @@ class StrukturDesaController extends Controller
     // 2. TAMBAH DATA BARU (Hanya Admin)
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'nama' => 'required|string|max:255',
             'jabatan' => 'required|string|max:255',
             'rw' => 'nullable|string|max:3',
             'rt' => 'nullable|string|max:3',
-            'alamat' => 'nullable|string',
-            'no_wa' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
+            'alamat' => 'nullable|string|max:500',
+            'no_wa' => ['nullable', 'regex:/^08\d{8,11}$/'],
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|mimetypes:image/jpeg,image/png|max:2048',
         ]);
-
-        $data = $request->all();
 
         // Logika upload foto jika ada berkas yang dikirim
         if ($request->hasFile('foto')) {
@@ -68,13 +66,15 @@ class StrukturDesaController extends Controller
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
-        $request->validate([
+        $data = $request->validate([
             'nama' => 'sometimes|required|string|max:255',
             'jabatan' => 'sometimes|required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'rw' => 'nullable|string|max:3',
+            'rt' => 'nullable|string|max:3',
+            'alamat' => 'nullable|string|max:500',
+            'no_wa' => ['nullable', 'regex:/^08\d{8,11}$/'],
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|mimetypes:image/jpeg,image/png|max:2048',
         ]);
-
-        $data = $request->all();
 
         if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada

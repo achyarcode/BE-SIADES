@@ -106,7 +106,13 @@ class SuratController extends Controller
         $oldFilePath = null;
 
         if ($request->hasFile('signed_pdf')) {
-            $newFilePath = $request->file('signed_pdf')->store('surats/signed', 'public');
+            $file = $request->file('signed_pdf');
+
+            if (strtolower($file->getClientOriginalExtension()) !== 'pdf') {
+                return response()->json(['message' => 'File hasil tanda tangan harus berformat PDF (.pdf)'], 422);
+            }
+
+            $newFilePath = $file->storeAs('surats/signed', Str::random(40).'.pdf', 'public');
             if (! $newFilePath) {
                 return response()->json(['message' => 'Gagal menyimpan PDF yang sudah ditandatangani'], 500);
             }

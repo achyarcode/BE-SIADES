@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StampStoreRequest;
 use App\Models\AdminStamp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,29 +16,26 @@ class AdminStampController extends Controller
         return response()->json($stamps);
     }
 
-    public function store(Request $request)
+    public function store(StampStoreRequest $request)
     {
-        $request->validate([
-            'stamp_name' => 'required|string|max:255',
-            'stamp_file' => 'required|file|image|mimes:png|max:2048', // FE specifies PNG, max 2MB
-        ]);
+        $validated = $request->validated();
 
         $adminId = $request->user()->id;
 
-        if (AdminStamp::where('admin_id', $adminId)->where('stamp_name', $request->stamp_name)->exists()) {
+        if (AdminStamp::where('admin_id', $adminId)->where('stamp_name', $validated['stamp_name'])->exists()) {
             return response()->json(['message' => 'Nama stempel sudah digunakan'], 409);
         }
 
-        $file = $request->file('stamp_file');
+        $file = $validated['stamp_file'];
         $fileName = 'stamps/' . Str::random(40) . '.png';
 
-        if (!Storage::disk('public')->put($fileName, file_get_contents($file))) {
+        if (! Storage::disk('public')->put($fileName, file_get_contents($file))) {
             return response()->json(['message' => 'Gagal menyimpan stempel'], 500);
         }
 
         $stamp = AdminStamp::create([
             'admin_id' => $adminId,
-            'stamp_name' => $request->stamp_name,
+            'stamp_name' => $validated['stamp_name'],
             'file_path' => $fileName,
         ]);
 

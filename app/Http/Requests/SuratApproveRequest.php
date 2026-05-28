@@ -15,7 +15,7 @@ class SuratApproveRequest extends FormRequest
     {
         return [
             'signature_position' => 'nullable|array',
-            'signed_pdf' => 'nullable|file|mimes:pdf|max:4096',
+            'signed_pdf' => 'nullable|file|mimes:pdf|mimetypes:application/pdf,application/x-pdf|max:4096',
         ];
     }
 }

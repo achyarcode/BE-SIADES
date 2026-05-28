@@ -27,12 +27,13 @@ class AdminSignatureController extends Controller
         }
 
         $base64Image = $validated['signature_data'];
+        $declaredType = null;
 
         // Strip the prefix if it exists
         if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $type)) {
             $base64Image = substr($base64Image, strpos($base64Image, ',') + 1);
-            $type = strtolower($type[1]); // png, jpg, etc.
-            if (! in_array($type, ['png', 'jpg', 'jpeg'])) {
+            $declaredType = strtolower($type[1]); // png, jpg, etc.
+            if (! in_array($declaredType, ['png', 'jpg', 'jpeg'], true)) {
                 return response()->json(['message' => 'Invalid image type'], 400);
             }
         } else {
@@ -49,7 +50,21 @@ class AdminSignatureController extends Controller
             return response()->json(['message' => 'Signature image terlalu besar'], 422);
         }
 
-        $fileName = 'signatures/'.Str::random(40).'.png';
+        $imageInfo = @getimagesizefromstring($imageData);
+        $detectedMime = is_array($imageInfo) ? ($imageInfo['mime'] ?? null) : null;
+        $extension = match ($detectedMime) {
+            'image/png' => 'png',
+            'image/jpeg' => 'jpg',
+            default => null,
+        };
+
+        $normalizedDeclaredType = $declaredType === 'jpeg' ? 'jpg' : $declaredType;
+
+        if ($extension === null || ($normalizedDeclaredType !== null && $normalizedDeclaredType !== $extension)) {
+            return response()->json(['message' => 'Payload tanda tangan harus berupa gambar PNG/JPG valid'], 422);
+        }
+
+        $fileName = 'signatures/'.Str::random(40).'.'.$extension;
 
         if (! Storage::disk('public')->put($fileName, $imageData)) {
             return response()->json(['message' => 'Gagal menyimpan tanda tangan'], 500);
@@ -96,12 +111,12 @@ class AdminSignatureController extends Controller
         }
 
         $fileData = Storage::disk('public')->get($path);
+        $imageInfo = @getimagesizefromstring($fileData);
+        $mime = is_array($imageInfo) && isset($imageInfo['mime']) ? $imageInfo['mime'] : 'image/png';
         $base64 = base64_encode($fileData);
-        $mime = 'image/png';
 
         return response()->json([
             'signature_data' => 'data:' . $mime . ';base64,' . $base64
         ]);
     }
 }
-
