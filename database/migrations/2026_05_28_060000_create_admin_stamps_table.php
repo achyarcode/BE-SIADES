@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admin_stamps', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('admin_id')->constrained('users')->cascadeOnDelete();
-            $table->string('stamp_name');
-            $table->string('file_path');
-            $table->boolean('is_active')->default(false);
-            $table->timestamps();
-        });
+        if (Schema::hasTable('admin_stamps') && ! Schema::hasColumn('admin_stamps', 'is_active')) {
+            Schema::table('admin_stamps', function (Blueprint $table) {
+                $table->boolean('is_active')->default(false)->after('file_path');
+            });
+        }
     }
 
     /**
@@ -26,6 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('admin_stamps');
+        if (Schema::hasTable('admin_stamps') && Schema::hasColumn('admin_stamps', 'is_active')) {
+            Schema::table('admin_stamps', function (Blueprint $table) {
+                $table->dropColumn('is_active');
+            });
+        }
     }
 };
