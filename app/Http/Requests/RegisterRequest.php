@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RegisterRequest extends FormRequest
 {
@@ -19,7 +20,7 @@ class RegisterRequest extends FormRequest
             'password' => 'required|string|min:6',
             'nik' => 'required|digits:16|unique:users,nik',
             'no_kk' => 'nullable|digits:16',
-            'no_telp' => ['nullable', 'regex:/^08\d{8,11}$/'],
+            'no_telp' => ['nullable', 'regex:/^08\d{8,11}$/', Rule::unique('users', 'no_telp')],
             'jenisKelamin' => 'required|in:L,P',
             'email' => 'nullable|email|unique:users,email|max:255',
             'rt' => 'nullable|string|max:10|regex:/^[A-Za-z0-9\s\-\/]+$/',

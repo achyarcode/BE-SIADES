@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UserStoreRequest extends FormRequest
 {
@@ -51,7 +52,7 @@ class UserStoreRequest extends FormRequest
             'password' => 'nullable|string|min:6',
             'nik' => 'required|digits:16|unique:users,nik',
             'no_kk' => 'nullable|digits:16',
-            'nomorWA' => ['nullable', 'regex:/^08\d{8,11}$/'],
+            'nomorWA' => ['nullable', 'regex:/^08\d{8,11}$/', Rule::unique('users', 'no_telp')],
             'email' => 'nullable|email|unique:users,email',
             'rt' => 'nullable|string|max:10|regex:/^[A-Za-z0-9\s\-\/]+$/',
             'rw' => 'nullable|string|max:10|regex:/^[A-Za-z0-9\s\-\/]+$/',

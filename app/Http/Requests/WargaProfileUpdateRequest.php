@@ -74,7 +74,7 @@ class WargaProfileUpdateRequest extends FormRequest
             'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($userId)],
             'nomorkk' => 'nullable|digits:16',
             'alamat' => 'nullable|string|max:500',
-            'nomorWA' => ['nullable', 'regex:/^08\d{8,11}$/'],
+            'nomorWA' => ['nullable', 'regex:/^08\d{8,11}$/', Rule::unique('users', 'no_telp')->ignore($userId)],
             'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($userId)],
             'rt' => 'nullable|string|max:10|regex:/^[A-Za-z0-9\s\-\/]+$/',
             'rw' => 'nullable|string|max:10|regex:/^[A-Za-z0-9\s\-\/]+$/',

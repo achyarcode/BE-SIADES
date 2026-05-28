@@ -79,7 +79,7 @@ class UserUpdateRequest extends FormRequest
             'password' => 'sometimes|string|min:6',
             'nik' => ['sometimes', 'digits:16', Rule::unique('users')->ignore($userId)],
             'no_kk' => 'nullable|digits:16',
-            'nomorWA' => ['nullable', 'regex:/^08\d{8,11}$/'],
+            'nomorWA' => ['nullable', 'regex:/^08\d{8,11}$/', Rule::unique('users', 'no_telp')->ignore($userId)],
             'email' => ['nullable', 'email', Rule::unique('users')->ignore($userId)],
             'rt' => 'nullable|string|max:10|regex:/^[A-Za-z0-9\s\-\/]+$/',
             'rw' => 'nullable|string|max:10|regex:/^[A-Za-z0-9\s\-\/]+$/',
