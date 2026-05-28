@@ -31,4 +31,12 @@ class RegisterRequest extends FormRequest
 
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'no_telp.unique' => 'Nomor HP sudah digunakan oleh akun lain.',
+            'no_telp.regex' => 'Nomor HP harus diawali 08 dan terdiri dari 10-13 digit.',
+        ];
+    }
 }

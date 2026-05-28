@@ -63,4 +63,12 @@ class UserStoreRequest extends FormRequest
             'mustUpdateCredentials' => 'nullable|boolean',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'nomorWA.unique' => 'Nomor HP sudah digunakan oleh akun lain.',
+            'nomorWA.regex' => 'Nomor HP harus diawali 08 dan terdiri dari 10-13 digit.',
+        ];
+    }
 }
