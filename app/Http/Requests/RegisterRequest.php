@@ -28,7 +28,6 @@ class RegisterRequest extends FormRequest
             'tempatLahir' => 'nullable|string|max:100',
             'tanggalLahir' => 'nullable|date',
 
-
         ];
     }
 }

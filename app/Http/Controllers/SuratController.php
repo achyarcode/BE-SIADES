@@ -8,8 +8,11 @@ use App\Http\Requests\SuratRejectRequest;
 use App\Http\Requests\SuratStoreRequest;
 use App\Models\JenisSurat;
 use App\Models\Surat;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class SuratController extends Controller
 {
@@ -99,32 +102,55 @@ class SuratController extends Controller
         }
 
         $validated = $request->validated();
+        $newFilePath = null;
+        $oldFilePath = null;
 
-        $surat = Surat::findOrFail($id);
-        if ($surat->status !== 'PENDING') {
-            return response()->json(['message' => 'Surat hanya bisa disetujui saat status masih PENDING'], 409);
-        }
-
-        // 1. Save signature position if provided
-        if (array_key_exists('signature_position', $validated)) {
-            $surat->signature_position = $validated['signature_position'];
-        }
-
-        // 2. Save signed PDF if provided (Phase 2 will handle server-side signing,
-        // for now we support manual upload of signed PDF if needed)
         if ($request->hasFile('signed_pdf')) {
-            if ($surat->file_path) {
-                Storage::disk('public')->delete($surat->file_path);
+            $newFilePath = $request->file('signed_pdf')->store('surats/signed', 'public');
+            if (! $newFilePath) {
+                return response()->json(['message' => 'Gagal menyimpan PDF yang sudah ditandatangani'], 500);
+            }
+        }
+
+        try {
+            $surat = DB::transaction(function () use ($id, $request, $validated, $newFilePath, &$oldFilePath) {
+                $surat = Surat::whereKey($id)->lockForUpdate()->firstOrFail();
+
+                if ($surat->status !== 'PENDING') {
+                    throw new HttpResponseException(
+                        response()->json(['message' => 'Surat hanya bisa disetujui saat status masih PENDING'], 409)
+                    );
+                }
+
+                // 1. Save signature position if provided
+                if (array_key_exists('signature_position', $validated)) {
+                    $surat->signature_position = $validated['signature_position'];
+                }
+
+                // 2. Point the record to the newly uploaded signed PDF.
+                if ($newFilePath) {
+                    $oldFilePath = $surat->file_path;
+                    $surat->file_path = $newFilePath;
+                }
+
+                // 3. Update status and audit trail
+                $surat->status = 'DISETUJUI';
+                $surat->approved_by = $request->user()->id;
+                $surat->save();
+
+                return $surat;
+            });
+        } catch (Throwable $e) {
+            if ($newFilePath) {
+                Storage::disk('public')->delete($newFilePath);
             }
 
-            $filePath = $request->file('signed_pdf')->store('surats/signed', 'public');
-            $surat->file_path = $filePath;
+            throw $e;
         }
 
-        // 3. Update status and audit trail
-        $surat->status = 'DISETUJUI';
-        $surat->approved_by = $request->user()->id;
-        $surat->save();
+        if ($newFilePath && $oldFilePath && $oldFilePath !== $newFilePath) {
+            Storage::disk('public')->delete($oldFilePath);
+        }
 
         return response()->json([
             'message' => 'Surat berhasil disetujui',

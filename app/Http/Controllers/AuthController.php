@@ -6,6 +6,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\WargaSetupCredentialsRequest;
 use App\Models\User;
+use App\Services\OtpDeliveryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -38,15 +39,16 @@ class AuthController extends Controller
             'nik' => $validated['nik'],
             'no_kk' => $validated['no_kk'] ?? null,
             'no_telp' => $validated['no_telp'] ?? null,
-            'jenis_kelamin' => isset($validated['jenisKelamin']) 
-             ? $validated['jenisKelamin']=== 'L' ? 'Laki-laki' : 'Perempuan' 
-             : null,
+            'jenis_kelamin' => isset($validated['jenisKelamin'])
+                ? ($validated['jenisKelamin'] === 'L' ? 'Laki-laki' : 'Perempuan')
+                : null,
             'email' => $validated['email'] ?? null,
             'rt' => $validated['rt'] ?? null,
             'rw' => $validated['rw'] ?? null,
             'alamat' => $validated['alamat'] ?? null,
             'tempat_lahir' => $validated['tempatLahir'] ?? null,
             'tanggal_lahir' => $validated['tanggalLahir'] ?? null,
+            'is_resident' => true,
         ]);
 
         // c. Berikan Hak Akses (Role) Otomatis sebagai warga
@@ -118,13 +120,14 @@ class AuthController extends Controller
         return $this->success('Logout berhasil');
     }
 
-    public function forgotPassword(Request $request)
+    public function forgotPassword(Request $request, OtpDeliveryService $otpDelivery)
     {
         $validated = $request->validate([
             'no_telp' => ['required', 'regex:/^08\d{8,11}$/'],
+            'nik' => ['required', 'digits:16'],
         ]);
 
-        $forgotRateKey = $this->forgotRateKey($validated['no_telp'], $request->ip() ?? 'unknown');
+        $forgotRateKey = $this->forgotRateKey($validated['no_telp'], $validated['nik'], $request->ip() ?? 'unknown');
         if (RateLimiter::tooManyAttempts($forgotRateKey, self::MAX_FORGOT_ATTEMPTS_PER_MINUTE)) {
             $seconds = RateLimiter::availableIn($forgotRateKey);
 
@@ -132,10 +135,16 @@ class AuthController extends Controller
         }
         RateLimiter::hit($forgotRateKey, 60);
 
-        $user = User::where('no_telp', $validated['no_telp'])->first();
+        $user = User::where('no_telp', $validated['no_telp'])
+            ->where('nik', $validated['nik'])
+            ->first();
+
+        $data = [
+            'expires_in_seconds' => self::RESET_OTP_TTL_MINUTES * 60,
+        ];
 
         if (! $user) {
-            return $this->error('Nomor HP tidak terdaftar.', 404);
+            return $this->success('Jika data cocok, kode OTP akan dikirim.', $data);
         }
 
         $otp = (string) random_int(100000, 999999);
@@ -146,15 +155,21 @@ class AuthController extends Controller
             'otp_hash' => Hash::make($otp),
         ], now()->addMinutes(self::RESET_OTP_TTL_MINUTES));
 
-        $data = [
-            'expires_in_seconds' => self::RESET_OTP_TTL_MINUTES * 60,
-        ];
+        try {
+            $otpDelivery->sendPasswordResetOtp($validated['no_telp'], $otp);
+        } catch (\Throwable $e) {
+            Cache::forget($key);
 
-        if (app()->environment(['local', 'development'])) {
+            report($e);
+
+            return $this->error('Gagal mengirim OTP. Coba lagi beberapa saat lagi.', 503);
+        }
+
+        if (app()->environment(['local', 'development']) && config('services.otp.channel', 'log') === 'log') {
             $data['debug_otp'] = $otp;
         }
 
-        return $this->success('Kode OTP berhasil dibuat.', $data);
+        return $this->success('Kode OTP berhasil dikirim.', $data);
     }
 
     public function verifyResetOtp(Request $request)
@@ -192,14 +207,10 @@ class AuthController extends Controller
             'user_id' => $payload['user_id'],
         ], now()->addMinutes(self::RESET_TOKEN_TTL_MINUTES));
 
-        // --- BAGIAN INI YANG DIUBAH AGAR MATCH DENGAN FRONTEND ---
         return $this->success('OTP terverifikasi.', [
-            'data' => [
-                'reset_token' => $resetToken,
-                'expires_in_seconds' => self::RESET_TOKEN_TTL_MINUTES * 60,
-            ]
+            'reset_token' => $resetToken,
+            'expires_in_seconds' => self::RESET_TOKEN_TTL_MINUTES * 60,
         ]);
-        // ---------------------------------------------------------
     }
 
     public function resetPassword(Request $request)
@@ -281,9 +292,9 @@ class AuthController extends Controller
         return 'password_reset:token:'.hash('sha256', $token);
     }
 
-    private function forgotRateKey(string $phone, string $ip): string
+    private function forgotRateKey(string $phone, string $nik, string $ip): string
     {
-        return "password_reset:forgot:{$phone}:{$ip}";
+        return 'password_reset:forgot:'.hash('sha256', "{$phone}:{$nik}:{$ip}");
     }
 
     private function verifyRateKey(string $phone): string

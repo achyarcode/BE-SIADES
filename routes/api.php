@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdminSignatureController;
+use App\Http\Controllers\AdminStampController;
+use App\Http\Controllers\Api\StrukturDesaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisSuratController;
@@ -8,31 +10,20 @@ use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\PerangkatDesaController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\Api\StrukturDesaController; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
-Route::post('/forgot-password', [AuthController::class, 'sendOtp']);
-Route::post('/verify-reset-otp', [AuthController::class, 'verifyOtp']);
-// ==========================================
 // URL PUBLIC (Tidak perlu token untuk akses ini)
-// ==========================================
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('/verify-reset-otp', [AuthController::class, 'verifyResetOtp']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
+Route::post('/verify-reset-otp', [AuthController::class, 'verifyResetOtp'])->middleware('throttle:5,1');
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/katalog', [KatalogController::class, 'publicIndex']);
-
-// TAMPILKAN STRUKTUR DESA UNTUK PUBLIK (TAMBAHAN BARU)
 Route::get('/struktur-desa', [StrukturDesaController::class, 'index']);
 Route::get('/struktur-desa/{id}', [StrukturDesaController::class, 'show']);
 
-
-// ==========================================
 // URL PROTECTED (Wajib bawa token Sanctum untuk akses ini)
-// ==========================================
 Route::middleware('auth:sanctum')->group(function () {
 
     // Cek profil user yang sedang login
@@ -48,16 +39,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/jenis-surat', [JenisSuratController::class, 'index']);
     Route::get('/warga/profile', [UserController::class, 'profile']);
     Route::put('/warga/profile', [UserController::class, 'updateProfile']);
+    Route::post('/warga/profile/photo', [UserController::class, 'updateProfilePhoto']);
     Route::post('/warga/account/setup', [AuthController::class, 'setupWargaCredentials']);
 
-    // AREA KHUSUS ADMIN & SUPER ADMIN
     Route::middleware(['role:admin|super-admin'])->group(function () {
-        
-        // MANAJEMEN STRUKTUR DESA (TAMBAHAN BARU)
-        Route::post('/admin/struktur-desa', [StrukturDesaController::class, 'store']);
-        Route::put('/admin/struktur-desa/{id}', [StrukturDesaController::class, 'update']);
-        Route::delete('/admin/struktur-desa/{id}', [StrukturDesaController::class, 'destroy']);
-
         // Admin Signatures
         Route::get('/admin/signatures', [AdminSignatureController::class, 'index']);
         Route::post('/admin/signatures', [AdminSignatureController::class, 'store']);
@@ -70,6 +55,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/admin/stamps/{id}', [\App\Http\Controllers\AdminStampController::class, 'destroy']);
         Route::get('/admin/stamps/{id}/image', [\App\Http\Controllers\AdminStampController::class, 'showImage']);
 
+
+        // Admin Stamps
+        Route::get('/admin/stamps', [AdminStampController::class, 'index']);
+        Route::post('/admin/stamps', [AdminStampController::class, 'store']);
+        Route::delete('/admin/stamps/{id}', [AdminStampController::class, 'destroy']);
+
+        // Struktur Desa
+        Route::post('/admin/struktur-desa', [StrukturDesaController::class, 'store']);
+        Route::put('/admin/struktur-desa/{id}', [StrukturDesaController::class, 'update']);
+        Route::delete('/admin/struktur-desa/{id}', [StrukturDesaController::class, 'destroy']);
 
         // Katalog (Admin)
         Route::get('/admin/katalog', [KatalogController::class, 'index']);

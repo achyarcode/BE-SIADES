@@ -8,6 +8,7 @@ use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\WargaProfileUpdateRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -33,6 +34,7 @@ class UserController extends Controller
             'tempatLahir' => $user->tempat_lahir,
             'tanggalLahir' => $user->tanggal_lahir,
             'email' => $user->email,
+            'profilePhoto' => $user->profile_photo,
             'mustUpdateCredentials' => (bool) $user->must_update_credentials,
         ]);
     }
@@ -82,8 +84,31 @@ class UserController extends Controller
                 'tempatLahir' => $user->tempat_lahir,
                 'tanggalLahir' => $user->tanggal_lahir,
                 'email' => $user->email,
+                'profilePhoto' => $user->profile_photo,
                 'mustUpdateCredentials' => (bool) $user->must_update_credentials,
             ],
+        ]);
+    }
+
+    public function updateProfilePhoto(Request $request)
+    {
+        $validated = $request->validate([
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        if ($user->profile_photo) {
+            Storage::disk('public')->delete($user->profile_photo);
+        }
+
+        $user->update([
+            'profile_photo' => $validated['profile_photo']->store('profile-photos', 'public'),
+        ]);
+
+        return response()->json([
+            'message' => 'Foto profil berhasil diperbarui',
+            'profilePhoto' => $user->profile_photo,
         ]);
     }
 
@@ -96,12 +121,8 @@ class UserController extends Controller
         $validated = $request->validated();
         $query = User::query();
 
-        // Only show users with 'warga' role, or no roles (unassigned citizens)
-        $query->where(function ($q) {
-            $q->whereHas('roles', function ($rq) {
-                $rq->where('name', 'warga');
-            })->orWhereDoesntHave('roles');
-        });
+        // Data Warga is based on resident identity, not system role.
+        $query->where('is_resident', true);
 
         // Search filter
         if (! empty($validated['search'])) {
@@ -186,6 +207,7 @@ class UserController extends Controller
             'must_update_credentials' => array_key_exists('mustUpdateCredentials', $validated)
                 ? (bool) $validated['mustUpdateCredentials']
                 : true,
+            'is_resident' => true,
         ]);
 
         // Assign 'warga' role (consistency with AuthController)
@@ -223,31 +245,33 @@ class UserController extends Controller
         if (isset($validated['nik'])) {
             $data['nik'] = $validated['nik'];
         }
-        if (isset($validated['no_kk'])) {
+        if (array_key_exists('no_kk', $validated)) {
             $data['no_kk'] = $validated['no_kk'];
         }
-        if (isset($validated['nomorWA'])) {
+        if (array_key_exists('nomorWA', $validated)) {
             $data['no_telp'] = $validated['nomorWA'];
         }
-        if (isset($validated['email'])) {
+        if (array_key_exists('email', $validated)) {
             $data['email'] = $validated['email'];
         }
-        if (isset($validated['rt'])) {
+        if (array_key_exists('rt', $validated)) {
             $data['rt'] = $validated['rt'];
         }
-        if (isset($validated['rw'])) {
+        if (array_key_exists('rw', $validated)) {
             $data['rw'] = $validated['rw'];
         }
-        if (isset($validated['alamat'])) {
+        if (array_key_exists('alamat', $validated)) {
             $data['alamat'] = $validated['alamat'];
         }
-        if (isset($validated['jenisKelamin'])) {
-            $data['jenis_kelamin'] = $validated['jenisKelamin'] === 'L' ? 'Laki-laki' : 'Perempuan';
+        if (array_key_exists('jenisKelamin', $validated)) {
+            $data['jenis_kelamin'] = $validated['jenisKelamin'] === null
+                ? null
+                : ($validated['jenisKelamin'] === 'L' ? 'Laki-laki' : 'Perempuan');
         }
-        if (isset($validated['tempatLahir'])) {
+        if (array_key_exists('tempatLahir', $validated)) {
             $data['tempat_lahir'] = $validated['tempatLahir'];
         }
-        if (isset($validated['tanggalLahir'])) {
+        if (array_key_exists('tanggalLahir', $validated)) {
             $data['tanggal_lahir'] = $validated['tanggalLahir'];
         }
         if (array_key_exists('mustUpdateCredentials', $validated)) {
