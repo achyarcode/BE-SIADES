@@ -236,13 +236,11 @@ class SuratController extends Controller
         }
 
         $name = trim((string) ($validated['jenis_surat'] ?? ''));
-        if ($name === '') {
-            $name = 'Lainnya';
-        }
+        $jenisSurat = JenisSurat::query()
+            ->where('nama', $name)
+            ->where('is_active', true)
+            ->firstOrFail();
 
-        return (int) JenisSurat::query()->firstOrCreate(
-            ['nama' => $name],
-            ['deskripsi' => null, 'is_active' => true]
-        )->id;
+        return (int) $jenisSurat->id;
     }
 }
