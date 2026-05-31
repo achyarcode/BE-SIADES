@@ -28,9 +28,9 @@ class StrukturDesaController extends Controller
             'jabatan' => 'required|string|max:255',
             'rw' => 'nullable|string|max:3',
             'rt' => 'nullable|string|max:3',
-            'alamat' => 'nullable|string|max:500',
-            'no_wa' => ['nullable', 'regex:/^08\d{8,11}$/'],
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|mimetypes:image/jpeg,image/png|max:2048',
+            'alamat' => 'required|string|max:500',
+            'no_wa' => ['required', 'regex:/^08\d{8,11}$/'],
+            'foto' => 'required|image|mimes:jpeg,png,jpg|mimetypes:image/jpeg,image/png|max:2048',
         ]);
 
         // Logika upload foto jika ada berkas yang dikirim
@@ -71,9 +71,15 @@ class StrukturDesaController extends Controller
             'jabatan' => 'sometimes|required|string|max:255',
             'rw' => 'nullable|string|max:3',
             'rt' => 'nullable|string|max:3',
-            'alamat' => 'nullable|string|max:500',
-            'no_wa' => ['nullable', 'regex:/^08\d{8,11}$/'],
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|mimetypes:image/jpeg,image/png|max:2048',
+            'alamat' => 'sometimes|required|string|max:500',
+            'no_wa' => ['sometimes', 'required', 'regex:/^08\d{8,11}$/'],
+            'foto' => [
+                $struktur->foto ? 'nullable' : 'required',
+                'image',
+                'mimes:jpeg,png,jpg',
+                'mimetypes:image/jpeg,image/png',
+                'max:2048',
+            ],
         ]);
 
         if ($request->hasFile('foto')) {

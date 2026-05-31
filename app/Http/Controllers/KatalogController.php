@@ -118,11 +118,11 @@ class KatalogController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_produk' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string|max:2000',
+            'nama_produk' => ['required', 'string', 'max:50', 'regex:/^[a-zA-Z0-9 ]+$/'],
+            'deskripsi' => 'nullable|string|max:500',
             'harga' => 'nullable|numeric|min:0|max:999999999999',
             'kontak_wa' => ['nullable', 'regex:/^08\d{8,11}$/'],
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|mimetypes:image/jpeg,image/png|max:2048',
+            'gambar' => 'required|image|mimes:jpeg,png,jpg|mimetypes:image/jpeg,image/png|max:2048',
         ]);
 
         $imagePath = null;
@@ -201,8 +201,8 @@ class KatalogController extends Controller
         }
 
         $request->validate([
-            'nama_produk' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string|max:2000',
+            'nama_produk' => ['required', 'string', 'max:50', 'regex:/^[a-zA-Z0-9 ]+$/'],
+            'deskripsi' => 'nullable|string|max:500',
             'harga' => 'nullable|numeric|min:0|max:999999999999',
             'kontak_wa' => ['nullable', 'regex:/^08\d{8,11}$/'],
         ]);
