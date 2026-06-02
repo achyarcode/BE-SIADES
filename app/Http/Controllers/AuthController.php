@@ -135,17 +135,32 @@ class AuthController extends Controller
         }
         RateLimiter::hit($forgotRateKey, 60);
 
+        $nikExists = User::where('nik', $validated['nik'])->exists();
+        $phoneExists = User::where('no_telp', $validated['no_telp'])->exists();
+
+        if (!$nikExists && !$phoneExists) {
+            return $this->error('NIK dan Nomor HP tidak terdaftar dalam sistem.', 404);
+        }
+
+        if (!$nikExists) {
+            return $this->error('NIK tidak terdaftar dalam sistem.', 404);
+        }
+
+        if (!$phoneExists) {
+            return $this->error('Nomor HP tidak terdaftar dalam sistem.', 404);
+        }
+
         $user = User::where('no_telp', $validated['no_telp'])
             ->where('nik', $validated['nik'])
             ->first();
 
+        if (!$user) {
+            return $this->error('Kombinasi NIK dan Nomor HP tidak cocok.', 404);
+        }
+
         $data = [
             'expires_in_seconds' => self::RESET_OTP_TTL_MINUTES * 60,
         ];
-
-        if (! $user) {
-            return $this->success('Jika data cocok, kode OTP akan dikirim.', $data);
-        }
 
         $otp = (string) random_int(100000, 999999);
         $key = $this->otpCacheKey($validated['no_telp']);
